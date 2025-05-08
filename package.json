@@ -1,0 +1,28 @@
+{
+  "name": "dag-layout",
+  "version": "1.0.0",
+  "description": "Graph Layout Helper",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ante-Mrkonjic/dag-layout.git"
+  },
+  "keywords": [
+    "graph",
+    "directed",
+    "acyclic",
+    "layout",
+    "layered",
+    "dag",
+    "permutation"
+  ],
+  "author": "Ante Mrkonjic",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ante-Mrkonjic/dag-layout/issues"
+  },
+  "homepage": "https://github.com/Ante-Mrkonjic/dag-layout#readme"
+}
