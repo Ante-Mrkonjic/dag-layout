@@ -86,9 +86,10 @@ VirtualEdge offers following access methods:
   Replacing the node data object with an updated version though a React state update is also a NOOP. 
 - metrics = "crossings": There are 2 options deciding what should be minimized during layouting, both referring to edges: "crossing", "distance"
   "crossings" is a bit slower than "distance" but also looks a bit better IMO
-- alignNodes = "start": There are 4 options: "start", "center-start", "center-end", "end"
+- alignNodes = "start": There are 5 options: "start", "center-start", "center-end", "end", "preset"
   This parameter decides how to position nodes in flow direction on edges that span more than one layer.
   Center offers 2 options because the layers are discrete. For odd edge lengths, both options will behave in the same manner.
+  If you choose "preset", have to set the flow coordinate yourself (pass it as 2nd parameter to addNode()). In this case, set an integer value for each node starting with 0 as first layer.
 - mergeVirtualNodes = "start": There are 3 options: "start", "end", null. Every edge which is longer than one layer will create a placeholder node on each layer it passes.
   When this option is activated, it will try to reduce the number of virtual nodes by merging those with the same predecessors or successors into one.
   "start", "end" are both active options, but "start" priotitizes merging nodes with the same predecessors and "end" with the same successors. 

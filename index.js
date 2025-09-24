@@ -13,7 +13,13 @@ const validate = (thresholdEvaluate, thresholdLayer, alignNodes, metrics) => {
       "thresholdEvaluate * thresholdLayer has to be < Number.MAX_SAFE_INTEGER"
     );
   }
-  const alignNodeValues = ["start", "center-start", "center-end", "end"];
+  const alignNodeValues = [
+    "start",
+    "center-start",
+    "center-end",
+    "end",
+    "preset",
+  ];
   if (!alignNodeValues.includes(alignNodes)) {
     throw new Error(
       "alignNodes has to be one of following values: " + alignNodeValues
@@ -144,11 +150,14 @@ const calculateFlow = (nodes, alignNodes) => {
         delete node.flowTop;
         delete node.flowBottom;
         break;
+      case "preset":
+        maxFlow = maxFlow > node.flow ? maxFlow : node.flow;
+        break;
       default:
     }
   }
 
-  return maxFlow;
+  return alignNodes === "preset" ? maxFlow + 1 : maxFlow;
 };
 
 const addVirtualNodes = (nodes, maxLength) => {
@@ -163,7 +172,7 @@ const addVirtualNodes = (nodes, maxLength) => {
       let predecessor = node;
 
       for (let i = nodeFlow + 1; i < successor.flow; i++) {
-        const intermediate = new VirtualNode(null, i);
+        const intermediate = new VirtualNode(undefined, i);
         intermediate.realPredecessors = [node];
         intermediate.realSuccessors = [successor];
         intermediate.groupIndex = node.groupIndex;
@@ -413,7 +422,10 @@ const findBestPermutation = (
 
   const calculatedLayers = end - start;
   const usedNodes = nodes.slice(start, end);
-  const usedEdges = edges.slice(start - 1, end - 1);
+  const usedEdges =
+    start === 0
+      ? [[], ...edges.slice(0, end - 1)]
+      : edges.slice(start - 1, end - 1);
   const usedMetrics = Array(calculatedLayers);
   const permState = Array(calculatedLayers);
   const permCounter = Array(calculatedLayers);
@@ -545,7 +557,7 @@ export class VirtualNode {
     this.flow = flow;
     this.orth = undefined;
     this.groupIndex = undefined;
-    this.virtual = flow !== undefined;
+    this.virtual = data === undefined;
     this.layoutId = undefined;
     this.predecessors = [];
     this.successors = [];
@@ -613,14 +625,14 @@ class Graph {
   getGroupCount = () => this.groupCount;
   getMetricsValue = () => this.metricsValue;
 
-  addNode = (nodeData) => {
+  addNode = (nodeData, flow) => {
     const id = nodeData[this.nodeIdProp];
 
     if (this.nodes[id] !== undefined) {
       throw new Error("Duplicate Node ID " + id);
     }
 
-    const node = new VirtualNode(nodeData);
+    const node = new VirtualNode(nodeData, flow);
     this.nodes[id] = node;
     return node;
   };
@@ -735,6 +747,16 @@ class Graph {
     validate(thresholdEvaluate, thresholdLayer, alignNodes, metrics);
 
     const nodes = Object.values(this.nodes);
+
+    if (
+      alignNodes === "preset" &&
+      nodes.some((node) => (node.flow ?? -1) === -1)
+    ) {
+      throw new Error(
+        "The flow property must be set for all nodes for alignNode = preset"
+      );
+    }
+
     const cyclicEdges = removeCycles(nodes);
     const nodeGroups = groupNodes(nodes);
     const groupCount = nodeGroups.length;
